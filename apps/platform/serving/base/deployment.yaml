@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: serving
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: serving
+  template:
+    metadata:
+      labels:
+        app: serving
+    spec:
+      containers:
+      - name: serving
+        image: git.alexshishin.ru/mlops/serving:3.3.0-python3.11
+        ports:
+        - containerPort: 8000
+          name: http
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 200m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
