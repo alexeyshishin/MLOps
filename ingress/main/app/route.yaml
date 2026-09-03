@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: frontend
+  namespace: mlops
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`app.alexshishin.ru`)
+      kind: Rule
+      services:
+        - name: frontend
+          port: 80
+  tls:
+    secretName: app-tls-secret

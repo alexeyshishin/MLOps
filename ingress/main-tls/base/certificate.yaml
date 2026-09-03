@@ -1,0 +1,127 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: app-alexshishin-ru
+  namespace: cert-manager
+spec:
+  secretName: app-tls-secret
+  duration: 2160h
+  renewBefore: 720h
+  commonName: app.alexshishin.ru
+  dnsNames:
+    - app.alexshishin.ru
+  issuerRef:
+    name: letsencrypt-http01
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: api-alexshishin-ru
+  namespace: cert-manager
+spec:
+  secretName: api-tls-secret
+  duration: 2160h
+  renewBefore: 720h
+  commonName: api.alexshishin.ru
+  dnsNames:
+    - api.alexshishin.ru
+  issuerRef:
+    name: letsencrypt-http01
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: git-alexshishin-ru
+  namespace: cert-manager
+spec:
+  secretName: git-tls-secret
+  duration: 2160h
+  renewBefore: 720h
+  commonName: git.alexshishin.ru
+  dnsNames:
+    - git.alexshishin.ru
+  issuerRef:
+    name: letsencrypt-http01
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: mlflow-alexshishin-ru
+  namespace: cert-manager
+spec:
+  secretName: mlflow-tls-secret
+  duration: 2160h
+  renewBefore: 720h
+  commonName: mlflow.alexshishin.ru
+  dnsNames:
+    - mlflow.alexshishin.ru
+  issuerRef:
+    name: letsencrypt-http01
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: airflow-alexshishin-ru
+  namespace: cert-manager
+spec:
+  secretName: airflow-tls-secret
+  duration: 2160h
+  renewBefore: 720h
+  commonName: airflow.alexshishin.ru
+  dnsNames:
+    - airflow.alexshishin.ru
+  issuerRef:
+    name: letsencrypt-http01
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: minio-alexshishin-ru
+  namespace: cert-manager
+spec:
+  secretName: minio-tls-secret
+  duration: 2160h
+  renewBefore: 720h
+  commonName: minio.alexshishin.ru
+  dnsNames:
+    - minio.alexshishin.ru
+  issuerRef:
+    name: letsencrypt-http01
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: minio-console-alexshishin-ru
+  namespace: cert-manager
+spec:
+  secretName: minio-console-tls-secret
+  duration: 2160h
+  renewBefore: 720h
+  commonName: minio-console.alexshishin.ru
+  dnsNames:
+    - minio-console.alexshishin.ru
+  issuerRef:
+    name: letsencrypt-http01
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-alexshishin-ru
+  namespace: cert-manager
+spec:
+  secretName: argocd-tls-secret
+  duration: 2160h
+  renewBefore: 720h
+  commonName: argocd.alexshishin.ru
+  dnsNames:
+    - argocd.alexshishin.ru
+  issuerRef:
+    name: letsencrypt-http01
+    kind: ClusterIssuer
