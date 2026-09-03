@@ -1,0 +1,52 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/argoproj/argocd
+  tag: v2.x.x
+
+server:
+  service:
+    type: ClusterIP
+    port: 443
+
+config:
+  url: https://argocd.alexshishin.ru
+  dex.config: |
+    connectors:
+      - type: oidc
+        id: google
+        name: Google
+        config:
+          clientID: YOUR_GOOGLE_CLIENT_ID
+          clientSecret: YOUR_GOOGLE_CLIENT_SECRET
+
+applicationSet:
+  enabled: true
+
+repoServer:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+controller:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
