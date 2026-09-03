@@ -1,0 +1,30 @@
+mode: standalone
+
+image:
+  tag: "RELEASE.2024-12-18T13-15-44Z"
+
+existingSecret: minio-secret
+
+persistence:
+  enabled: true
+  size: 30Gi
+  storageClass: local-path
+
+resources:
+  requests:
+    cpu: 300m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+buckets:
+  - name: mlflow-artifacts
+    policy: none
+  - name: airflow-logs
+    policy: none
+
+consoleService:
+  type: ClusterIP
+service:
+  type: ClusterIP

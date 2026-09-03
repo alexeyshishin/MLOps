@@ -1,0 +1,52 @@
+image:
+  tag: "1.26.0"
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: local-path
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+
+gitea:
+  admin:
+    existingSecret: gitea-secret
+  config:
+    database:
+      DB_TYPE: postgres
+      HOST: postgres-postgresql.mlops.svc.cluster.local:5432
+      NAME: gitea
+      USER: postgres
+    server:
+      DOMAIN: git.alexshishin.ru
+      SSH_DOMAIN: git.alexshishin.ru
+      ROOT_URL: https://git.alexshishin.ru/
+    repository:
+      ROOT: /data/git/repositories
+
+extraEnvVars:
+  - name: GITEA__database__PASSWD
+    valueFrom:
+      secretKeyRef:
+        name: postgres-secret
+        key: postgres-password
+
+postgresql:
+  enabled: false
+
+redis-cluster:
+  enabled: false
+
+service:
+  http:
+    type: ClusterIP
+    port: 3000
+  ssh:
+    type: ClusterIP
+    port: 22

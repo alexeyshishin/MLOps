@@ -1,0 +1,68 @@
+executor: KubernetesExecutor
+
+images:
+  airflow:
+    tag: "3.3.1"
+
+data:
+  metadataSecretName: airflow-postgres-secret
+  brokerUrlSecretName: airflow-redis-secret
+
+postgresql:
+  enabled: false
+
+redis:
+  enabled: false
+
+dagProcessor:
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+apiServer:
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+scheduler:
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+triggerer:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+dags:
+  gitSync:
+    enabled: true
+    repo: "https://git.alexshishin.ru/mlops/mlops.git"
+    branch: main
+    subPath: "MLOps/dags"
+    wait: 60
+
+webserverSecretKeySecretName: airflow-webserver-secret
+
+config:
+  kubernetes_executor:
+    namespace: mlops
+    worker_container_repository: git.alexshishin.ru/mlops/serving
+    worker_container_tag: latest
+    delete_worker_pods: "True"

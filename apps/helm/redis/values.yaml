@@ -1,0 +1,22 @@
+architecture: standalone
+
+auth:
+  enabled: true
+  existingSecret: redis-secret
+  existingSecretPasswordKey: redis-password
+
+image:
+  tag: "7.0.15-debian-12-r0"
+
+master:
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClass: local-path
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

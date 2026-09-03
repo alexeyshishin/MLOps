@@ -1,0 +1,22 @@
+image:
+  tag: "v0.2.11"
+
+gitea:
+  url: "https://git.alexshishin.ru"
+  existingSecret: gitea-act-runner-secret
+
+runner:
+  labels:
+    - "shell:host"
+
+config:
+  container:
+    enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

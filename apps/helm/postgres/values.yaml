@@ -1,0 +1,28 @@
+auth:
+  existingSecret: postgres-secret
+  secretKeys:
+    adminPasswordKey: postgres-password
+
+image:
+  tag: "15.10.0-debian-12-r0"
+
+primary:
+  initdb:
+    scripts:
+      create-app-databases.sql: |
+        CREATE DATABASE gitea;
+        CREATE DATABASE mlflow;
+        CREATE DATABASE airflow;
+  persistence:
+    enabled: true
+    size: 20Gi
+    storageClass: local-path
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+architecture: standalone
