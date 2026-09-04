@@ -12,8 +12,9 @@ kubectl -n argocd get pods -w
 ```
 
 ```bash
-htpasswd -nbBC 10 "" "<пароль>" | tr -d ':\n' | sed 's/^\$2y/\$2a/'
-# вписать хэш в argocd/secrets/argocd-admin-secret.yaml
+htpasswd -nbBC 10 "" "<пароль admin>" | tr -d ':\n' | sed 's/^\$2y/\$2a/'
+htpasswd -nbBC 10 "" "<пароль readonly>" | tr -d ':\n' | sed 's/^\$2y/\$2a/'
+# вписать хэши в argocd/secrets/argocd-admin-secret.yaml (admin.password, accounts.readonly.password)
 kubectl apply -f argocd/secrets/argocd-admin-secret.yaml
 ```
 
@@ -118,6 +119,6 @@ kustomize build apps/platform/frontend/dev
 | `airflow-postgres-secret` | mlops | `connection` |
 | `airflow-redis-secret` | mlops | `connection` |
 | `airflow-webserver-secret` | mlops | `webserver-secret-key` |
-| `argocd-secret` | argocd | `admin.password`, `admin.passwordMtime` |
+| `argocd-secret` | argocd | `admin.password`, `admin.passwordMtime`, `accounts.readonly.password`, `accounts.readonly.passwordMtime` |
 
 Postgres/redis пароли в `airflow.yaml` должны совпадать с `postgres.yaml`/`redis.yaml`.
