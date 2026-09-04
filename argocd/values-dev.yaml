@@ -9,16 +9,16 @@ server:
     type: ClusterIP
     port: 443
 
-config:
-  url: https://argocd.alexshishin.ru
-  dex.config: |
-    connectors:
-      - type: oidc
-        id: google
-        name: Google
-        config:
-          clientID: YOUR_GOOGLE_CLIENT_ID
-          clientSecret: YOUR_GOOGLE_CLIENT_SECRET
+configs:
+  cm:
+    url: https://argocd.alexshishin.ru
+    accounts.readonly: apiKey, login
+  rbac:
+    policy.default: role:readonly
+    policy.csv: |
+      p, role:admin, *, *, *, allow
+      g, admin, role:admin
+      g, readonly, role:readonly
 
 applicationSet:
   enabled: true
