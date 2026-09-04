@@ -53,9 +53,8 @@ triggerer:
 dags:
   gitSync:
     enabled: true
-    repo: "https://git.alexshishin.ru/mlops/mlops.git"
+    repo: "https://git.alexshishin.ru/mlops/airflow-dags.git"
     branch: main
-    subPath: "MLOps/dags"
     wait: 60
 
 webserverSecretKeySecretName: airflow-webserver-secret
