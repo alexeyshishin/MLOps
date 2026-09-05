@@ -12,5 +12,7 @@ spec:
       services:
         - name: frontend
           port: 80
+      middlewares:
+        - name: rate-limit-app
   tls:
     secretName: app-tls-secret

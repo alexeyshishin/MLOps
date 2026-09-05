@@ -5,3 +5,4 @@ namespace: mlops
 
 resources:
   - route.yaml
+  - middleware.yaml

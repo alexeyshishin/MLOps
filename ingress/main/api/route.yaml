@@ -12,5 +12,7 @@ spec:
       services:
         - name: serving
           port: 8000
+      middlewares:
+        - name: rate-limit-api
   tls:
     secretName: api-tls-secret
