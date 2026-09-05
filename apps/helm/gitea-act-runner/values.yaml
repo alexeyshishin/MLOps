@@ -1,22 +1,36 @@
-image:
-  tag: "v0.2.11"
+enabled: true
 
-gitea:
-  url: "https://git.alexshishin.ru"
-  existingSecret: gitea-act-runner-secret
+giteaRootURL: "https://git.alexshishin.ru"
 
-runner:
-  labels:
-    - "shell:host"
+existingSecret: gitea-act-runner-secret
+existingSecretKey: token
 
-config:
-  container:
-    enabled: false
-
-resources:
-  requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
+statefulset:
+  persistence:
+    size: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  runner:
+    config: |
+      log:
+        level: info
+      runner:
+        labels:
+          - "shell:host"
+      cache:
+        enabled: false
+      container:
+        require_docker: false
+  dind:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
