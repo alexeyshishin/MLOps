@@ -7,23 +7,27 @@ backendStore:
     host: postgres-postgresql.mlops.svc.cluster.local
     port: 5432
     database: mlflow
-    user: postgres
-    existingSecret: postgres-secret
-    existingSecretPasswordKey: postgres-password
+  existingDatabaseSecret:
+    name: postgres-secret
+    usernameKey: postgres-user
+    passwordKey: postgres-password
 
 artifactRoot:
   s3:
     enabled: true
     bucket: mlflow-artifacts
-    awsAccessKeyIdSecret: minio-secret
-    awsAccessKeyIdSecretKey: root-user
-    awsSecretAccessKeySecret: minio-secret
-    awsSecretAccessKeySecretKey: root-password
-    s3EndpointUrl: http://minio.mlops.svc.cluster.local:9000
+    existingSecret:
+      name: minio-secret
+      keyOfAccessKeyId: root-user
+      keyOfSecretAccessKey: root-password
+
+extraEnvVars:
+  MLFLOW_S3_ENDPOINT_URL: http://minio.mlops.svc.cluster.local:9000
 
 auth:
   enabled: true
-  existingSecret: mlflow-basic-auth-secret
+  existingAdminSecret:
+    name: mlflow-basic-auth-secret
 
 resources:
   requests:

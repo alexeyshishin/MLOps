@@ -40,6 +40,9 @@ extraEnvVars:
 postgresql:
   enabled: false
 
+postgresql-ha:
+  enabled: false
+
 redis-cluster:
   enabled: false
 
