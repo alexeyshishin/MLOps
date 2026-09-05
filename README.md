@@ -1,5 +1,25 @@
 # MLOps
 
+## Установка K3s на VM
+
+```bash
+ssh <user>@<VM_IP>
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.36.4+k3s1" sh -
+k3s kubectl get nodes
+```
+
+## Установка Kubeconfig на свою машину
+
+```bash
+ssh <user>@<VM_IP> "cat /etc/rancher/k3s/k3s.yaml" > ~/.kube/mlops.yaml
+sed -i '' "s/127.0.0.1/<VM_IP>/; s/default/mlops/g" ~/.kube/mlops.yaml
+chmod 600 ~/.kube/mlops.yaml
+export KUBECONFIG=~/.kube/mlops.yaml
+kubectl get nodes
+```
+
+## Раскатка кластера
+
 ```bash
 kubectl apply -k namespaces/dev
 ```
@@ -91,6 +111,12 @@ kustomize build ingress/main/dev
 kustomize build ingress/main-tls/dev
 kustomize build apps/platform/serving/dev
 kustomize build apps/platform/frontend/dev
+```
+
+## Dry-run проверка
+
+```bash
+python3 scripts/dry-run-cluster.py
 ```
 
 ## Sync-wave
