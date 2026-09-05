@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import argparse
+import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 import yaml
 
@@ -47,10 +49,33 @@ def classify(doc):
     }
 
 
+def repo_alias(url):
+    netloc = urlparse(url).netloc or url
+    return re.sub(r"[^a-z0-9]+", "-", netloc.lower()).strip("-")
+
+
+def ensure_helm_repos(apps):
+    aliases = {}
+    for _, doc in apps:
+        info = classify(doc)
+        if info["type"] != "helm":
+            continue
+        url = info["repoURL"]
+        if url in aliases:
+            continue
+        alias = repo_alias(url)
+        aliases[url] = alias
+        subprocess.run(
+            ["helm", "repo", "add", alias, url, "--force-update"],
+            capture_output=True, text=True,
+        )
+    if aliases:
+        subprocess.run(["helm", "repo", "update", *aliases.values()], capture_output=True, text=True)
+
+
 def run_helm(name, info):
     cmd = [
-        "helm", "template", name, info["chart"],
-        "--repo", info["repoURL"],
+        "helm", "template", name, f"{repo_alias(info['repoURL'])}/{info['chart']}",
         "--version", info["version"],
         "--namespace", info["namespace"],
     ]
@@ -84,6 +109,8 @@ def main():
     if not apps:
         print(f"no Application manifests found under {APPS_DIR}")
         sys.exit(2)
+
+    ensure_helm_repos(apps)
 
     results = []
     for path, doc in apps:
