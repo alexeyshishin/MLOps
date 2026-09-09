@@ -43,7 +43,10 @@ postgresql:
 postgresql-ha:
   enabled: false
 
-redis-cluster:
+valkey-cluster:
+  enabled: false
+
+valkey:
   enabled: false
 
 service:

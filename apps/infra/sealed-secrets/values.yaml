@@ -1,5 +1,10 @@
 fullnameOverride: sealed-secrets-controller
 
+image:
+  registry: docker.io
+  repository: bitnamilegacy/sealed-secrets-controller
+  tag: "0.31.0-debian-12-r0"
+
 resources:
   requests:
     cpu: 50m
