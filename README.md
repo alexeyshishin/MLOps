@@ -160,7 +160,7 @@ python3 scripts/dry-run-cluster.py
 |---|---|---|
 | `postgres-secret` | mlops | `postgres-password` |
 | `redis-secret` | mlops | `redis-password` |
-| `minio-secret` | mlops | `root-user`, `root-password` |
+| `minio-secret` | mlops | `rootUser`, `rootPassword` |
 | `gitea-secret` | mlops | `username`, `password` |
 | `gitea-act-runner-secret` | mlops | `token` |
 | `mlflow-basic-auth-secret` | mlops | `username`, `password` |
