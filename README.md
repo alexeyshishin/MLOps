@@ -11,14 +11,16 @@ k3s kubectl get nodes
 ## Установка Kubeconfig на свою машину
 
 ```bash
-ssh <user>@<VM_IP> "cat /etc/rancher/k3s/k3s.yaml" > ~/.kube/mlops.yaml
-sed -i '' "s/127.0.0.1/<VM_IP>/; s/default/mlops/g" ~/.kube/mlops.yaml
+ssh root@200.169.183.169 "cat /etc/rancher/k3s/k3s.yaml" > ~/.kube/mlops.yaml
+sed -i '' "s/127.0.0.1/200.169.183.169/; s/default/mlops/g" ~/.kube/mlops.yaml
 chmod 600 ~/.kube/mlops.yaml
 export KUBECONFIG=~/.kube/mlops.yaml
 kubectl get nodes
 ```
 
 ## Раскатка кластера
+
+Источник манифестов для ArgoCD — GitHub (`https://github.com/alexeyshishin/MLOps.git`), постоянно, без миграции на свой Gitea. Gitea в кластере поднимается только под Container Registry и Act Runner (CI), GitOps-источником не является — иначе курица-яйцо (ArgoCD не может стянуть манифесты из Gitea, которую сам же должен развернуть).
 
 ```bash
 kubectl apply -k namespaces/dev
@@ -32,10 +34,30 @@ kubectl -n argocd get pods -w
 ```
 
 ```bash
+cp argocd/secrets/argocd-admin-secret.template.yaml argocd/secrets/argocd-admin-secret.yaml
 htpasswd -nbBC 10 "" "<пароль admin>" | tr -d ':\n' | sed 's/^\$2y/\$2a/'
 htpasswd -nbBC 10 "" "<пароль readonly>" | tr -d ':\n' | sed 's/^\$2y/\$2a/'
-# вписать хэши в argocd/secrets/argocd-admin-secret.yaml (admin.password, accounts.readonly.password)
+date -u +"%Y-%m-%dT%H:%M:%SZ"
+# вписать хэши и timestamp в argocd/secrets/argocd-admin-secret.yaml (НЕ в template — тот в git, только placeholder)
 kubectl apply -f argocd/secrets/argocd-admin-secret.yaml
+```
+
+```bash
+grep -rl "GIT_REPO_URL_PLACEHOLDER" . | xargs sed -i '' 's#GIT_REPO_URL_PLACEHOLDER#https://github.com/alexeyshishin/MLOps.git#g'
+git add -A
+git commit -m "chore: set argocd source repo url"
+git push
+```
+
+```bash
+kubectl apply -f argocd/bootstrap/root.yaml
+kubectl -n argocd get applications -w
+```
+
+Дождаться, что контроллер живой — kubeseal без него не отработает:
+
+```bash
+kubectl -n kube-system get pods -w   # sealed-secrets-controller -> Running
 ```
 
 ```bash
@@ -47,7 +69,7 @@ cp template-gitea.yaml gitea.yaml
 cp template-gitea-act-runner.yaml gitea-act-runner.yaml
 cp template-mlflow.yaml mlflow.yaml
 cp template-airflow.yaml airflow.yaml
-# вписать REPLACE_WITH_* в каждом файле
+# вписать REPLACE_WITH_* в каждом файле (template-* НЕ трогать — они в git, только placeholder)
 openssl rand -hex 32   # для airflow-webserver-secret.webserver-secret-key
 ```
 
@@ -64,12 +86,12 @@ done
 cd -
 ```
 
-```bash
-grep -rl "GIT_REPO_URL_PLACEHOLDER" . | xargs sed -i '' 's#GIT_REPO_URL_PLACEHOLDER#https://git.alexshishin.ru/<org>/mlops.git#g'
-```
+Запушить sealed-секреты — wave 1 (`secrets`) тянет их из `manual/secrets/dev/sealed` на GitHub, локальный `kubectl apply` тут не поможет:
 
 ```bash
-kubectl apply -f argocd/bootstrap/root.yaml
+git add manual/secrets/dev/sealed
+git commit -m "chore(secrets): seal dev secrets"
+git push
 kubectl -n argocd get applications -w
 ```
 
@@ -82,7 +104,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.pas
 kubectl get certificate -n cert-manager
 ```
 
-Настроить Gitea: `https://git.alexshishin.ru`, логин из `manual/secrets/dev/gitea.yaml`, включить Container Registry, создать репозиторий, запушить туда содержимое `MLOps/`.
+Настроить Gitea: `https://git.alexshishin.ru`, логин из `manual/secrets/dev/gitea.yaml`, включить Container Registry, создать репозиторий (для CI/Registry, не для GitOps-манифестов), запушить туда содержимое `MLOps/`.
 
 Зарегистрировать Act Runner (Site Administration → Actions → Runners → токен):
 
