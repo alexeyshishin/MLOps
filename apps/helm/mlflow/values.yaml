@@ -26,6 +26,7 @@ extraEnvVars:
 
 auth:
   enabled: true
+  sqliteFullPath: /tmp/
   existingAdminSecret:
     name: mlflow-basic-auth-secret
 
