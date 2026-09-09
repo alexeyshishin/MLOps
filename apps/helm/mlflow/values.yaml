@@ -1,5 +1,5 @@
 image:
-  tag: "v3.15.0"
+  tag: "3.15.0"
 
 backendStore:
   postgres:
