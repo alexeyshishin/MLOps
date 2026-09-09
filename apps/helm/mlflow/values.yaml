@@ -33,10 +33,10 @@ auth:
 resources:
   requests:
     cpu: 200m
-    memory: 768Mi
+    memory: 1Gi
   limits:
     cpu: 1000m
-    memory: 2Gi
+    memory: 3Gi
 
 service:
   type: ClusterIP
