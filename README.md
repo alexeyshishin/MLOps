@@ -43,7 +43,7 @@ kubectl apply -f argocd/secrets/argocd-admin-secret.yaml
 ```
 
 ```bash
-grep -rl "GIT_REPO_URL_PLACEHOLDER" . | xargs sed -i '' 's#GIT_REPO_URL_PLACEHOLDER#https://github.com/alexeyshishin/MLOps.git#g'
+grep -rl "https://github.com/alexeyshishin/MLOps.git" . | xargs sed -i '' 's#https://github.com/alexeyshishin/MLOps.git#https://github.com/alexeyshishin/MLOps.git#g'
 git add -A
 git commit -m "chore: set argocd source repo url"
 git push

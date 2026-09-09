@@ -14,7 +14,7 @@ spec:
       helm:
         valueFiles:
           - $values/apps/infra/postgres/values.yaml
-    - repoURL: GIT_REPO_URL_PLACEHOLDER
+    - repoURL: https://github.com/alexeyshishin/MLOps.git
       targetRevision: main
       ref: values
   destination:

@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: GIT_REPO_URL_PLACEHOLDER
+    repoURL: https://github.com/alexeyshishin/MLOps.git
     targetRevision: main
     path: argocd/overlays/dev
   destination:
