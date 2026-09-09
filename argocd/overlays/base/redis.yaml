@@ -13,7 +13,7 @@ spec:
       targetRevision: 17.4.3
       helm:
         valueFiles:
-          - $values/apps/helm/redis/values.yaml
+          - $values/apps/infra/redis/values.yaml
     - repoURL: GIT_REPO_URL_PLACEHOLDER
       targetRevision: main
       ref: values
