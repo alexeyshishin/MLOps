@@ -5,7 +5,7 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: shishin.omsk55rus@gmail.com
+    email: cert@alexshishin.ru
     privateKeySecretRef:
       name: letsencrypt-http01-account-key
     solvers:
