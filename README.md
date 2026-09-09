@@ -24,6 +24,7 @@ kubectl get nodes
 
 ```bash
 kubectl apply -k namespaces/dev
+kubectl apply -k apps/infra/traefik/dev
 ```
 
 ```bash
@@ -130,7 +131,9 @@ kustomize build namespaces/dev
 kustomize build argocd/overlays/dev
 kustomize build manual/secrets/dev/sealed
 kustomize build ingress/main/dev
+kustomize build ingress/main/argocd-transport
 kustomize build ingress/main-tls/dev
+kustomize build apps/infra/traefik/dev
 kustomize build apps/platform/serving/dev
 kustomize build apps/platform/frontend/dev
 ```
