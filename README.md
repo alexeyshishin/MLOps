@@ -104,6 +104,8 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.pas
 kubectl get certificate -n cert-manager
 ```
 
+Sync-wave 2 (`ingress-tls`) кладёт только `Certificate`-ресурсы — сам `ClusterIssuer` (`letsencrypt-http01`, ACME HTTP01 через traefik) лежит отдельно, `ingress/main-tls/issuer`, подключён к `ingress/main-tls/dev` вторым base. Без него все `Certificate` висят `False: Issuing certificate as Secret does not exist` бесконечно — `ClusterIssuer` не создаётся сам, `kubectl get clusterissuer` пустой.
+
 Настроить Gitea: `https://git.alexshishin.ru`, логин из `manual/secrets/dev/gitea.yaml`, включить Container Registry, создать репозиторий (для CI/Registry, не для GitOps-манифестов), запушить туда содержимое `MLOps/`.
 
 Зарегистрировать Act Runner (Site Administration → Actions → Runners → токен):
