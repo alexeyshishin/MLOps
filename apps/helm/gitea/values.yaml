@@ -29,6 +29,8 @@ gitea:
       ROOT_URL: https://git.alexshishin.ru/
     repository:
       ROOT: /data/git/repositories
+    actions:
+      ENABLED: true
   additionalConfigSources:
     - secret:
         secretName: gitea-db-passwd
