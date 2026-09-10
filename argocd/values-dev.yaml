@@ -12,13 +12,13 @@ server:
 configs:
   cm:
     url: https://argocd.alexshishin.ru
-    accounts.readonly: apiKey, login
+    accounts.jury: apiKey, login
   rbac:
     policy.default: role:readonly
     policy.csv: |
       p, role:admin, *, *, *, allow
       g, admin, role:admin
-      g, readonly, role:readonly
+      g, jury, role:readonly
 
 applicationSet:
   enabled: true
