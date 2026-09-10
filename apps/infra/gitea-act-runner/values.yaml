@@ -5,6 +5,14 @@ giteaRootURL: "https://git.alexshishin.ru"
 existingSecret: gitea-act-runner-secret
 existingSecretKey: token
 
+preExtraInitContainers:
+  - name: install-kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    command: ["/busybox/cp", "/kaniko/executor", "/kaniko-bin/executor"]
+    volumeMounts:
+      - name: kaniko-bin
+        mountPath: /kaniko-bin
+
 statefulset:
   persistence:
     size: 1Gi
@@ -15,6 +23,15 @@ statefulset:
     limits:
       cpu: 500m
       memory: 512Mi
+  extraVolumes:
+    - name: kaniko-bin
+      emptyDir: {}
+    - name: kaniko-docker-config
+      secret:
+        secretName: kaniko-registry-creds
+        items:
+          - key: .dockerconfigjson
+            path: config.json
   runner:
     config: |
       log:
@@ -26,6 +43,15 @@ statefulset:
         enabled: false
       container:
         require_docker: false
+    extraVolumeMounts:
+      - name: kaniko-bin
+        mountPath: /kaniko-bin
+      - name: kaniko-docker-config
+        mountPath: /kaniko-docker-config
+        readOnly: true
+    extraEnvs:
+      - name: DOCKER_CONFIG
+        value: /kaniko-docker-config
   dind:
     resources:
       requests:
