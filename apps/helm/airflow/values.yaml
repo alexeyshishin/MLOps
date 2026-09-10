@@ -60,6 +60,8 @@ dags:
 
 webserverSecretKeySecretName: airflow-webserver-secret
 fernetKeySecretName: airflow-fernet-key
+apiSecretKeySecretName: airflow-api-secret-key
+jwtSecretName: airflow-jwt-secret
 
 config:
   kubernetes_executor:
