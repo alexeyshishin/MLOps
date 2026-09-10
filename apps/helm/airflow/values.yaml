@@ -53,7 +53,7 @@ triggerer:
 dags:
   gitSync:
     enabled: true
-    repo: "https://git.alexshishin.ru/mlops/airflow-dags.git"
+    repo: "https://git.alexshishin.ru/mlops/training.git"
     branch: main
     wait: 60
     subPath: ""
