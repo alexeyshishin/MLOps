@@ -1,6 +1,9 @@
 image:
   tag: "1.26.0"
 
+strategy:
+  type: Recreate
+
 persistence:
   enabled: true
   size: 10Gi
