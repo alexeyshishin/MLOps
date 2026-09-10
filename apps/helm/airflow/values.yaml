@@ -59,6 +59,7 @@ dags:
     subPath: ""
 
 webserverSecretKeySecretName: airflow-webserver-secret
+fernetKeySecretName: airflow-fernet-key
 
 config:
   kubernetes_executor:
