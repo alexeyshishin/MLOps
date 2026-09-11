@@ -12,8 +12,20 @@ preExtraInitContainers:
     volumeMounts:
       - name: kaniko-bin
         mountPath: /kaniko-bin
+  - name: install-kubectl
+    image: curlimages/curl:8.10.1
+    command:
+      - sh
+      - -c
+      - |
+        curl -fsSL -o /kaniko-bin/kubectl https://dl.k8s.io/release/v1.37.0/bin/linux/amd64/kubectl
+        chmod +x /kaniko-bin/kubectl
+    volumeMounts:
+      - name: kaniko-bin
+        mountPath: /kaniko-bin
 
 statefulset:
+  serviceAccountName: gitea-act-runner-podmgr
   persistence:
     size: 1Gi
   resources:
@@ -32,6 +44,10 @@ statefulset:
         items:
           - key: .dockerconfigjson
             path: config.json
+    - name: ci-workspace
+      hostPath:
+        path: /opt/ci-workspace
+        type: DirectoryOrCreate
   runner:
     config: |
       log:
@@ -49,6 +65,8 @@ statefulset:
       - name: kaniko-docker-config
         mountPath: /kaniko-docker-config
         readOnly: true
+      - name: ci-workspace
+        mountPath: /ci-workspace
     extraEnvs:
       - name: DOCKER_CONFIG
         value: /kaniko-docker-config

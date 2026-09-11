@@ -13,12 +13,18 @@ configs:
   cm:
     url: https://argocd.alexshishin.ru
     accounts.jury: apiKey, login
+    accounts.ci-sync: apiKey
   rbac:
     policy.default: role:readonly
     policy.csv: |
       p, role:admin, *, *, *, allow
       g, admin, role:admin
       g, jury, role:readonly
+      p, role:ci-sync, applications, get, default/frontend, allow
+      p, role:ci-sync, applications, sync, default/frontend, allow
+      p, role:ci-sync, applications, get, default/serving, allow
+      p, role:ci-sync, applications, sync, default/serving, allow
+      g, ci-sync, role:ci-sync
 
 applicationSet:
   enabled: true

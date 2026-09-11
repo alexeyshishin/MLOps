@@ -9,6 +9,7 @@ resources:
   - redis.yaml
   - minio.yaml
   - gitea.yaml
+  - gitea-act-runner-rbac.yaml
   - gitea-act-runner.yaml
   - mlflow.yaml
   - airflow.yaml
