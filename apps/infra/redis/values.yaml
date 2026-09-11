@@ -6,9 +6,9 @@ auth:
   existingSecretPasswordKey: redis-password
 
 image:
-  registry: docker.io
-  repository: bitnamilegacy/redis
-  tag: "7.0.15-debian-11-r0"
+  registry: git.alexshishin.ru
+  repository: mlops/redis
+  tag: "latest"
 
 commonConfiguration: |-
   appendonly yes
