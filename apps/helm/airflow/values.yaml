@@ -2,7 +2,8 @@ executor: KubernetesExecutor
 
 images:
   airflow:
-    tag: "3.3.1"
+    repository: git.alexshishin.ru/mlops/airflow-custom
+    tag: "latest"
 
 data:
   metadataSecretName: airflow-postgres-secret
@@ -56,7 +57,7 @@ dags:
     repo: "https://git.alexshishin.ru/mlops/training.git"
     branch: main
     wait: 60
-    subPath: ""
+    subPath: "dags"
 
 webserverSecretKeySecretName: airflow-webserver-secret
 fernetKeySecretName: airflow-fernet-key
@@ -90,6 +91,4 @@ createUserJob:
 config:
   kubernetes_executor:
     namespace: mlops
-    worker_container_repository: git.alexshishin.ru/mlops/training
-    worker_container_tag: latest
     delete_worker_pods: "True"
