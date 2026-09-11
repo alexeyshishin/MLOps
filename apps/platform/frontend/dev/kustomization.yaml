@@ -9,4 +9,4 @@ labels:
       env: dev
 images:
   - name: git.alexshishin.ru/mlops/frontend
-    newTag: latest
+    newTag: eb942c7224bdea248eb8290b64e5fb6f99c96eb3
