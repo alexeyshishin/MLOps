@@ -23,7 +23,7 @@ artifactRoot:
 
 extraEnvVars:
   MLFLOW_S3_ENDPOINT_URL: http://minio.mlops.svc.cluster.local:9000
-  MLFLOW_SERVER_ALLOWED_HOSTS: mlflow.alexshishin.ru
+  MLFLOW_SERVER_ALLOWED_HOSTS: "mlflow.alexshishin.ru,mlflow.mlops.svc.cluster.local,mlflow"
 
 auth:
   enabled: true
