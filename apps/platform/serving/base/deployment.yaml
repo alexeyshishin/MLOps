@@ -18,13 +18,46 @@ spec:
         ports:
         - containerPort: 8000
           name: http
+        env:
+        - name: MLFLOW_TRACKING_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-basic-auth-secret
+              key: username
+        - name: MLFLOW_TRACKING_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-basic-auth-secret
+              key: password
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: root-user
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: root-password
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: redis-password
         resources:
           requests:
-            cpu: 200m
-            memory: 512Mi
+            cpu: 500m
+            memory: 768Mi
           limits:
-            cpu: 200m
-            memory: 512Mi
+            cpu: 500m
+            memory: 768Mi
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 30
         livenessProbe:
           httpGet:
             path: /health
@@ -33,7 +66,7 @@ spec:
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /health
+            path: /ready
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 5
