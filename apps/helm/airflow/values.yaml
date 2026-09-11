@@ -63,6 +63,30 @@ fernetKeySecretName: airflow-fernet-key
 apiSecretKeySecretName: airflow-api-secret-key
 jwtSecretName: airflow-jwt-secret
 
+createUserJob:
+  env:
+    - name: _AIRFLOW_ADMIN_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: airflow-admin-secret
+          key: username
+    - name: _AIRFLOW_ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow-admin-secret
+          key: password
+  args:
+    - "bash"
+    - "-c"
+    - |-
+      exec airflow users create \
+        -r Admin \
+        -u "$_AIRFLOW_ADMIN_USERNAME" \
+        -e "$_AIRFLOW_ADMIN_USERNAME@example.com" \
+        -f airflow \
+        -l admin \
+        -p "$_AIRFLOW_ADMIN_PASSWORD"
+
 config:
   kubernetes_executor:
     namespace: mlops
