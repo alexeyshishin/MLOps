@@ -9,4 +9,4 @@ labels:
       env: dev
 images:
   - name: git.alexshishin.ru/mlops/serving
-    newTag: 3.3.0-python3.11
+    newTag: e84e79af12fc683a22364cd214d67b628271b684
