@@ -66,6 +66,6 @@ jwtSecretName: airflow-jwt-secret
 config:
   kubernetes_executor:
     namespace: mlops
-    worker_container_repository: git.alexshishin.ru/mlops/serving
+    worker_container_repository: git.alexshishin.ru/mlops/training
     worker_container_tag: latest
     delete_worker_pods: "True"
