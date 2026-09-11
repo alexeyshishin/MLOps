@@ -7,3 +7,6 @@ labels:
   - pairs:
       app: frontend
       env: dev
+images:
+  - name: git.alexshishin.ru/mlops/frontend
+    newTag: latest

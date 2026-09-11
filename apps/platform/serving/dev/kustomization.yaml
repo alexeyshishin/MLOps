@@ -7,3 +7,6 @@ labels:
   - pairs:
       app: serving
       env: dev
+images:
+  - name: git.alexshishin.ru/mlops/serving
+    newTag: 3.3.0-python3.11
