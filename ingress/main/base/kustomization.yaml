@@ -5,6 +5,7 @@ resources:
   - ../app
   - ../api
   - ../git
+  - ../git-ssh
   - ../mlflow
   - ../airflow
   - ../minio
