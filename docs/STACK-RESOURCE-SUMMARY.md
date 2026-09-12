@@ -43,8 +43,7 @@ VM: Timeweb Cloud 12 vCPU / 32GB RAM / 100GB SSD
 | CPU | 3.49 vCPU | 10.75 vCPU | 12 vCPU | 1.25 vCPU |
 | RAM | 7.3GB | 20.36GB | 32GB | 11.64GB |
 
-**Вывод**: после добавления мониторинг-стека (prometheus-grafana без
-Alertmanager, только метрики — Loki/promtail исключены из скоупа, тир 2)
+**Вывод**: после добавления мониторинг-стека (prometheus-grafana)
 лимит CPU — 10.75 из 12 vCPU, запас 1.25 vCPU. Совпадение Kaniko-билда
 (+1.5 vCPU) или Airflow worker'а (+500m) с пиком самого мониторинга может
 привести к кратковременному throttling, не к OOM (лимиты памяти запас
