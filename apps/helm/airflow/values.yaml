@@ -55,7 +55,7 @@ dags:
   gitSync:
     enabled: true
     repo: "https://git.alexshishin.ru/mlops/training.git"
-    branch: main
+    branch: distill-classifier
     wait: 60
     subPath: "dags"
 
