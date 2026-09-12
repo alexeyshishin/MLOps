@@ -5,6 +5,10 @@ giteaRootURL: "https://git.alexshishin.ru"
 existingSecret: gitea-act-runner-secret
 existingSecretKey: token
 
+global:
+  imagePullSecrets:
+    - kaniko-registry-creds
+
 preExtraInitContainers:
   - name: install-kaniko
     image: gcr.io/kaniko-project/executor:debug
@@ -49,6 +53,8 @@ statefulset:
         path: /opt/ci-workspace
         type: DirectoryOrCreate
   runner:
+    fullOverride: "git.alexshishin.ru/mlops/act-runner:latest"
+    pullPolicy: Always
     config: |
       log:
         level: info
