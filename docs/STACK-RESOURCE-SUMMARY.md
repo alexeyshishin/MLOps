@@ -25,8 +25,8 @@ VM: Timeweb Cloud 12 vCPU / 32GB RAM / 100GB SSD
 | prometheus | 300m | 512Mi | 500m | 1Gi | metrics TSDB, retention 7d |
 | kube-state-metrics | 20m | 64Mi | 100m | 128Mi | k8s object metrics |
 | node-exporter | 20m | 32Mi | 50m | 64Mi | DaemonSet, host metrics |
-| grafana | 100m | 128Mi | 200m | 256Mi | дашборды, публичный ingress |
-| **TOTAL BASELINE** | **3.44 vCPU** | **7.18GB** | **10.65 vCPU** | **19.86GB** | idle-состояние |
+| grafana | 150m | 256Mi | 300m | 768Mi | дашборды, публичный ingress — лимит поднят с 256Mi после живого OOMKill (Grafana 13.x, unified storage + app-platform подсистемы уже ~237Mi на холодном старте) |
+| **TOTAL BASELINE** | **3.49 vCPU** | **7.3GB** | **10.75 vCPU** | **20.36GB** | idle-состояние |
 
 ## Пиковые нагрузки
 
@@ -40,15 +40,15 @@ VM: Timeweb Cloud 12 vCPU / 32GB RAM / 100GB SSD
 
 | Метрика | Запрос (request) | Лимит (limit) | Доступно | Запас |
 |---|---|---|---|---|
-| CPU | 3.44 vCPU | 10.65 vCPU | 12 vCPU | 1.35 vCPU |
-| RAM | 7.18GB | 19.86GB | 32GB | 12.14GB |
+| CPU | 3.49 vCPU | 10.75 vCPU | 12 vCPU | 1.25 vCPU |
+| RAM | 7.3GB | 20.36GB | 32GB | 11.64GB |
 
 **Вывод**: после добавления мониторинг-стека (prometheus-grafana без
 Alertmanager, только метрики — Loki/promtail исключены из скоупа, тир 2)
-лимит CPU — 10.65 из 12 vCPU, запас 1.35 vCPU. Совпадение Kaniko-билда
+лимит CPU — 10.75 из 12 vCPU, запас 1.25 vCPU. Совпадение Kaniko-билда
 (+1.5 vCPU) или Airflow worker'а (+500m) с пиком самого мониторинга может
 привести к кратковременному throttling, не к OOM (лимиты памяти запас
-держат — 12.14GB). `kubectl top nodes` во время демо не лишний, как и
+держат — 11.64GB). `kubectl top nodes` во время демо не лишний, как и
 раньше.
 
 ## Namespaces

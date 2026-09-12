@@ -52,11 +52,11 @@ grafana:
     size: 1Gi
   resources:
     requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 200m
+      cpu: 150m
       memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 768Mi
   grafana.ini:
     server:
       root_url: https://grafana.alexshishin.ru
