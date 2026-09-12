@@ -10,7 +10,7 @@ spec:
     - match: Host(`grafana.alexshishin.ru`)
       kind: Rule
       services:
-        - name: prometheus-grafana-grafana
+        - name: prometheus-grafana
           namespace: monitoring
           port: 80
   tls:

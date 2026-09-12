@@ -203,7 +203,7 @@ Grafana — единственный компонент с публичным in
 (`https://grafana.alexshishin.ru`), логин через `grafana-admin-secret`.
 Ingress-роут (`ingress/main/grafana/route.yaml`) сам живёт в namespace
 `mlops` (переопределяется overlay'ем `ingress/main/dev`), а сервис
-`prometheus-grafana-grafana` — в `monitoring`: cross-namespace роутинг через
+`prometheus-grafana` — в `monitoring`: cross-namespace роутинг через
 явный `namespace: monitoring` на `services[]` внутри IngressRoute (тот же
 паттерн, что у `ingress/main/argocd/route.yaml` → `argocd`), плюс
 `providers.kubernetesCRD.allowCrossNamespace: true` в

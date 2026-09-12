@@ -41,12 +41,12 @@ spec:
             - |
               set -e
               for i in $(seq 1 30); do
-                curl -sf "http://prometheus-grafana-grafana.monitoring.svc.cluster.local/api/health" \
-                  > /dev/null && break
+                curl -sf "http://prometheus-grafana.monitoring.svc.cluster.local/api/health" \
+                  > /dev/null && break || true
                 sleep 2
               done
               curl -s -u "$GRAFANA_ADMIN_USERNAME:$GRAFANA_ADMIN_PASSWORD" \
-                -X POST "http://prometheus-grafana-grafana.monitoring.svc.cluster.local/api/admin/users" \
+                -X POST "http://prometheus-grafana.monitoring.svc.cluster.local/api/admin/users" \
                 -H "Content-Type: application/json" \
                 -d "{\"name\":\"Jury\",\"login\":\"$GRAFANA_JURY_USERNAME\",\"email\":\"jury@alexshishin.ru\",\"password\":\"$GRAFANA_JURY_PASSWORD\"}"
               exit 0
