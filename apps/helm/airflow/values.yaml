@@ -92,3 +92,14 @@ config:
   kubernetes_executor:
     namespace: mlops
     delete_worker_pods: "True"
+  logging:
+    remote_logging: "True"
+    remote_base_log_folder: "s3://airflow-logs/logs"
+    remote_log_conn_id: "minio_s3"
+
+env:
+  - name: AIRFLOW_CONN_MINIO_S3
+    valueFrom:
+      secretKeyRef:
+        name: airflow-minio-conn-secret
+        key: connection
