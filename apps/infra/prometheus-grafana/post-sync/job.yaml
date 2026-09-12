@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: grafana-jury-user
+  namespace: monitoring
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: create-jury-user
+          image: curlimages/curl:8.11.1
+          env:
+            - name: GRAFANA_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-admin-secret
+                  key: username
+            - name: GRAFANA_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-admin-secret
+                  key: password
+            - name: GRAFANA_JURY_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-jury-secret
+                  key: username
+            - name: GRAFANA_JURY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-jury-secret
+                  key: password
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              for i in $(seq 1 30); do
+                curl -sf "http://prometheus-grafana-grafana.monitoring.svc.cluster.local/api/health" \
+                  > /dev/null && break
+                sleep 2
+              done
+              curl -s -u "$GRAFANA_ADMIN_USERNAME:$GRAFANA_ADMIN_PASSWORD" \
+                -X POST "http://prometheus-grafana-grafana.monitoring.svc.cluster.local/api/admin/users" \
+                -H "Content-Type: application/json" \
+                -d "{\"name\":\"Jury\",\"login\":\"$GRAFANA_JURY_USERNAME\",\"email\":\"jury@alexshishin.ru\",\"password\":\"$GRAFANA_JURY_PASSWORD\"}"
+              exit 0

@@ -76,17 +76,34 @@ createUserJob:
         secretKeyRef:
           name: airflow-admin-secret
           key: password
+    - name: _AIRFLOW_JURY_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: airflow-jury-secret
+          key: username
+    - name: _AIRFLOW_JURY_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow-jury-secret
+          key: password
   args:
     - "bash"
     - "-c"
     - |-
-      exec airflow users create \
+      airflow users create \
         -r Admin \
         -u "$_AIRFLOW_ADMIN_USERNAME" \
         -e "$_AIRFLOW_ADMIN_USERNAME@example.com" \
         -f airflow \
         -l admin \
-        -p "$_AIRFLOW_ADMIN_PASSWORD"
+        -p "$_AIRFLOW_ADMIN_PASSWORD" || true
+      airflow users create \
+        -r Viewer \
+        -u "$_AIRFLOW_JURY_USERNAME" \
+        -e "$_AIRFLOW_JURY_USERNAME@example.com" \
+        -f jury \
+        -l jury \
+        -p "$_AIRFLOW_JURY_PASSWORD" || true
 
 config:
   kubernetes_executor:

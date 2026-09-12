@@ -5,6 +5,12 @@ image:
 
 existingSecret: minio-secret
 
+users:
+  - accessKey: jury
+    existingSecret: minio-jury-secret
+    existingSecretKey: password
+    policy: readonly
+
 persistence:
   enabled: true
   size: 30Gi

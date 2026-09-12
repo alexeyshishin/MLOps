@@ -1,34 +1,35 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mlflow
+  name: prometheus-grafana
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "8"
 spec:
   project: default
   sources:
-    - repoURL: https://community-charts.github.io/helm-charts
-      chart: mlflow
-      targetRevision: 1.11.5
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 90.1.1
       helm:
         valueFiles:
-          - $values/apps/helm/mlflow/values.yaml
+          - $values/apps/infra/prometheus-grafana/values.yaml
     - repoURL: https://github.com/alexeyshishin/MLOps.git
       targetRevision: main
       ref: values
     - repoURL: https://github.com/alexeyshishin/MLOps.git
       targetRevision: main
-      path: apps/helm/mlflow/post-sync
+      path: apps/infra/prometheus-grafana/post-sync
   destination:
     server: https://kubernetes.default.svc
-    namespace: mlops
+    namespace: monitoring
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
     retry:
       limit: 5
       backoff:

@@ -21,7 +21,12 @@ VM: Timeweb Cloud 12 vCPU / 32GB RAM / 100GB SSD
 | cert-manager | 100m | 256Mi | 500m | 512Mi | TLS automation |
 | serving | 200m | 512Mi | 1000m | 2Gi | FastAPI classification |
 | frontend | 100m | 256Mi | 500m | 512Mi | nginx SPA |
-| **TOTAL BASELINE** | **2.95 vCPU** | **6.4GB** | **9.7 vCPU** | **18.3GB** | idle-состояние |
+| prometheus-operator | 50m | 64Mi | 100m | 128Mi | kube-prometheus-stack operator |
+| prometheus | 300m | 512Mi | 500m | 1Gi | metrics TSDB, retention 7d |
+| kube-state-metrics | 20m | 64Mi | 100m | 128Mi | k8s object metrics |
+| node-exporter | 20m | 32Mi | 50m | 64Mi | DaemonSet, host metrics |
+| grafana | 100m | 128Mi | 200m | 256Mi | дашборды, публичный ingress |
+| **TOTAL BASELINE** | **3.44 vCPU** | **7.18GB** | **10.65 vCPU** | **19.86GB** | idle-состояние |
 
 ## Пиковые нагрузки
 
@@ -35,14 +40,21 @@ VM: Timeweb Cloud 12 vCPU / 32GB RAM / 100GB SSD
 
 | Метрика | Запрос (request) | Лимит (limit) | Доступно | Запас |
 |---|---|---|---|---|
-| CPU | 2.95 vCPU | 9.7 vCPU | 12 vCPU | 9.05 vCPU |
-| RAM | 6.4GB | 18.3GB | 32GB | 13.7GB |
+| CPU | 3.44 vCPU | 10.65 vCPU | 12 vCPU | 1.35 vCPU |
+| RAM | 7.18GB | 19.86GB | 32GB | 12.14GB |
 
-**Вывод**: базовая конфигурация укладывается в 12 vCPU / 32GB с большим запасом. Запас ~9 vCPU / ~13.7GB с комфортом перекрывает пики Kaniko и Airflow без риска OOM-киллов даже при их совпадении. Мониторинг `kubectl top nodes` во время демо остаётся не лишним, но критичность риска ниже, чем на прежней смете (8 vCPU / 24GB).
+**Вывод**: после добавления мониторинг-стека (prometheus-grafana без
+Alertmanager, только метрики — Loki/promtail исключены из скоупа, тир 2)
+лимит CPU — 10.65 из 12 vCPU, запас 1.35 vCPU. Совпадение Kaniko-билда
+(+1.5 vCPU) или Airflow worker'а (+500m) с пиком самого мониторинга может
+привести к кратковременному throttling, не к OOM (лимиты памяти запас
+держат — 12.14GB). `kubectl top nodes` во время демо не лишний, как и
+раньше.
 
 ## Namespaces
 
 - `mlops` — все приложения (Gitea, MinIO, Postgres, Redis, MLflow, Airflow, serving, frontend)
+- `monitoring` — prometheus-grafana
 - `argocd` — ArgoCD control plane
 - `cert-manager` — Certificate Issuer и Resources для TLS
 - `kube-system` — K3s системные компоненты
@@ -56,7 +68,9 @@ VM: Timeweb Cloud 12 vCPU / 32GB RAM / 100GB SSD
 - `minio`: 30Gi
 - `gitea`: 10Gi
 - `gitea-act-runner`: 1Gi (`data-runner`, чарт `actions` v0.1.2)
-- **Итого**: 63Gi из 100Gb SSD
+- `prometheus`: 5Gi
+- `grafana`: 1Gi
+- **Итого**: 69Gi из 100Gb SSD
 
 ## Контроль ресурсов
 

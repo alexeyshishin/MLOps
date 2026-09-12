@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mlflow-jury-user
+  namespace: mlops
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: create-jury-user
+          image: curlimages/curl:8.11.1
+          env:
+            - name: MLFLOW_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mlflow-basic-auth-secret
+                  key: username
+            - name: MLFLOW_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mlflow-basic-auth-secret
+                  key: password
+            - name: MLFLOW_JURY_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mlflow-jury-secret
+                  key: username
+            - name: MLFLOW_JURY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mlflow-jury-secret
+                  key: password
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              for i in $(seq 1 30); do
+                curl -sf -u "$MLFLOW_ADMIN_USERNAME:$MLFLOW_ADMIN_PASSWORD" \
+                  "http://mlflow.mlops.svc.cluster.local:5000/api/2.0/mlflow/users/get?username=$MLFLOW_ADMIN_USERNAME" \
+                  > /dev/null && break
+                sleep 2
+              done
+              curl -s -u "$MLFLOW_ADMIN_USERNAME:$MLFLOW_ADMIN_PASSWORD" \
+                -X POST "http://mlflow.mlops.svc.cluster.local:5000/api/2.0/mlflow/users/create" \
+                -H "Content-Type: application/json" \
+                -d "{\"username\":\"$MLFLOW_JURY_USERNAME\",\"password\":\"$MLFLOW_JURY_PASSWORD\"}"
+              exit 0

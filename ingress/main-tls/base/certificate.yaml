@@ -125,3 +125,19 @@ spec:
   issuerRef:
     name: letsencrypt-http01
     kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: grafana-alexshishin-ru
+  namespace: cert-manager
+spec:
+  secretName: grafana-tls-secret
+  duration: 2160h
+  renewBefore: 720h
+  commonName: grafana.alexshishin.ru
+  dnsNames:
+    - grafana.alexshishin.ru
+  issuerRef:
+    name: letsencrypt-http01
+    kind: ClusterIssuer

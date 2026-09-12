@@ -70,6 +70,11 @@ cp template-gitea.yaml gitea.yaml
 cp template-gitea-act-runner.yaml gitea-act-runner.yaml
 cp template-mlflow.yaml mlflow.yaml
 cp template-airflow.yaml airflow.yaml
+cp template-minio-jury.yaml minio-jury.yaml
+cp template-airflow-jury.yaml airflow-jury.yaml
+cp template-mlflow-jury.yaml mlflow-jury.yaml
+cp template-grafana.yaml grafana.yaml
+cp template-grafana-jury.yaml grafana-jury.yaml
 # вписать REPLACE_WITH_* в каждом файле (template-* НЕ трогать — они в git, только placeholder)
 openssl rand -hex 32   # для airflow-webserver-secret.webserver-secret-key
 ```
@@ -77,15 +82,34 @@ openssl rand -hex 32   # для airflow-webserver-secret.webserver-secret-key
 ```bash
 brew install kubeseal   # версия должна совпадать с контроллером: 0.39.1
 
-for f in postgres redis minio gitea gitea-act-runner mlflow airflow; do
+for f in postgres redis minio gitea gitea-act-runner mlflow airflow minio-jury airflow-jury mlflow-jury; do
   kubeseal --format=yaml \
     --controller-name=sealed-secrets-controller \
     --controller-namespace=kube-system \
     < "$f.yaml" > "sealed/$f.yaml"
   rm "$f.yaml"
 done
+kubeseal --format=yaml \
+  --controller-name=sealed-secrets-controller \
+  --controller-namespace=kube-system \
+  -n monitoring \
+  < grafana.yaml > sealed/grafana.yaml
+rm grafana.yaml
+kubeseal --format=yaml \
+  --controller-name=sealed-secrets-controller \
+  --controller-namespace=kube-system \
+  -n monitoring \
+  < grafana-jury.yaml > sealed/grafana-jury.yaml
+rm grafana-jury.yaml
 cd -
 ```
+
+Дописать `grafana.yaml` и `grafana-jury.yaml` в `resources` файла
+`manual/secrets/dev/sealed/kustomization.yaml` — до этого момента
+`kustomize build manual/secrets/dev/sealed` их не подхватит.
+`grafana-admin-secret`/`grafana-jury-secret` живут в `monitoring`, а не в
+`mlops` — namespace уже зашит в шаблонах, флаг `-n monitoring` для kubeseal
+дублирует его явно.
 
 Запушить sealed-секреты — wave 1 (`secrets`) тянет их из `manual/secrets/dev/sealed` на GitHub, локальный `kubectl apply` тут не поможет:
 
@@ -156,6 +180,53 @@ python3 scripts/dry-run-cluster.py
 | 5 | mlflow, airflow |
 | 6 | serving, frontend |
 | 7 | ingress-main |
+| 8 | prometheus-grafana |
+
+## Мониторинг
+
+`prometheus-grafana` (Application, чарт `kube-prometheus-stack`) — Prometheus +
+Grafana, Alertmanager выключен (`alertmanager.enabled: false`) — для этого
+стека не разворачивается вообще. Loki/promtail (агрегация логов) из скоупа
+исключены — только метрики.
+
+Весь стек живёт в отдельном namespace `monitoring` (не `mlops`) —
+`namespaces/base/monitoring.yaml` создаёт его заранее при
+`kubectl apply -k namespaces/dev`, это нужно до wave 1 (`secrets` тянет
+`grafana-admin-secret`/`grafana-jury-secret` в `monitoring` уже на wave 1,
+раньше, чем `CreateNamespace=true` у `prometheus-grafana` на wave 8 успел бы
+его создать).
+
+`kubeControllerManager`/`kubeScheduler`/`kubeEtcd`/`kubeProxy` выключены —
+на k3s этих эндпоинтов нет, дефолтные алерты по ним ложно сработают.
+
+Grafana — единственный компонент с публичным ingress
+(`https://grafana.alexshishin.ru`), логин через `grafana-admin-secret`.
+Ingress-роут (`ingress/main/grafana/route.yaml`) сам живёт в namespace
+`mlops` (переопределяется overlay'ем `ingress/main/dev`), а сервис
+`prometheus-grafana-grafana` — в `monitoring`: cross-namespace роутинг через
+явный `namespace: monitoring` на `services[]` внутри IngressRoute (тот же
+паттерн, что у `ingress/main/argocd/route.yaml` → `argocd`), плюс
+`providers.kubernetesCRD.allowCrossNamespace: true` в
+`apps/infra/traefik/base/helmchartconfig.yaml` — без него cross-namespace
+роутинг Traefik отклоняет по умолчанию.
+
+Read-only логин для жюри — `jury`/`jury_pass`, роль `Viewer`
+(`grafana.ini.users.auto_assign_org_role: Viewer`). Аккаунт создаётся
+не декларативно (у чарта Grafana нет multi-user values, в отличие от MinIO),
+а PostSync hook Job'ом (`apps/infra/prometheus-grafana/post-sync/job.yaml`,
+3-й `sources[]` у Application `prometheus-grafana`) — тот же паттерн, что
+`apps/helm/mlflow/post-sync` для `mlflow-jury-secret`: Job ждёт
+`/api/health`, затем `POST /api/admin/users` под admin-basic-auth создаёт
+`jury`-пользователя через Grafana Admin API.
+
+Prometheus — только `kubectl port-forward`, без ingress/TLS. Дефолтные
+alerting-правила `kube-prometheus-stack` продолжают считаться в Prometheus и
+видны в его UI — просто никуда не маршрутизируются (Alertmanager не развёрнут).
+
+`prometheus-grafana` — единственное Application с
+`syncOptions: [CreateNamespace=true, ServerSideApply=true]`: CRD чарта
+`kube-prometheus-stack` превышают лимит 262144 байт
+`last-applied-configuration` при client-side apply.
 
 ## Секреты
 
@@ -170,6 +241,8 @@ python3 scripts/dry-run-cluster.py
 | `airflow-postgres-secret` | mlops | `connection` |
 | `airflow-redis-secret` | mlops | `connection` |
 | `airflow-webserver-secret` | mlops | `webserver-secret-key` |
+| `grafana-admin-secret` | monitoring | `username`, `password` |
+| `grafana-jury-secret` | monitoring | `username`, `password` (роль `Viewer`, read-only, создаётся PostSync Job'ом) |
 | `argocd-secret` | argocd | `admin.password`, `admin.passwordMtime`, `accounts.readonly.password`, `accounts.readonly.passwordMtime` |
 
 Postgres/redis пароли в `airflow.yaml` должны совпадать с `postgres.yaml`/`redis.yaml`.

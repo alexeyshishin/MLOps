@@ -11,3 +11,4 @@ resources:
   - ../minio
   - ../minio-console
   - ../argocd
+  - ../grafana

@@ -17,3 +17,4 @@ resources:
   - frontend.yaml
   - ingress-main.yaml
   - ingress-argocd-transport.yaml
+  - prometheus-grafana.yaml
