@@ -9,4 +9,4 @@ labels:
       env: dev
 images:
   - name: git.alexshishin.ru/mlops/serving
-    newTag: f30523ca4c8a1b5b6db7f837bf23bf6b2fb0628f
+    newTag: 0d8e970b8336482156c2fcfb7998604e71a69ab1
