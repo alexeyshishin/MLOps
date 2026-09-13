@@ -43,12 +43,7 @@ date -u +"%Y-%m-%dT%H:%M:%SZ"
 kubectl apply -f argocd/secrets/argocd-admin-secret.yaml
 ```
 
-```bash
-grep -rl "https://github.com/alexeyshishin/MLOps.git" . | xargs sed -i '' 's#https://github.com/alexeyshishin/MLOps.git#https://github.com/alexeyshishin/MLOps.git#g'
-git add -A
-git commit -m "chore: set argocd source repo url"
-git push
-```
+Repo-URL для ArgoCD уже финальный (`https://github.com/alexeyshishin/MLOps.git`) во всех манифестах — отдельный шаг с заменой плейсхолдера не нужен.
 
 ```bash
 kubectl apply -f argocd/bootstrap/root.yaml
@@ -67,6 +62,7 @@ cp template-postgres.yaml postgres.yaml
 cp template-redis.yaml redis.yaml
 cp template-minio.yaml minio.yaml
 cp template-gitea.yaml gitea.yaml
+cp template-gitea-db-passwd.yaml gitea-db-passwd.yaml
 cp template-gitea-act-runner.yaml gitea-act-runner.yaml
 cp template-mlflow.yaml mlflow.yaml
 cp template-airflow.yaml airflow.yaml
@@ -75,14 +71,28 @@ cp template-airflow-jury.yaml airflow-jury.yaml
 cp template-mlflow-jury.yaml mlflow-jury.yaml
 cp template-grafana.yaml grafana.yaml
 cp template-grafana-jury.yaml grafana-jury.yaml
-# вписать REPLACE_WITH_* в каждом файле (template-* НЕ трогать — они в git, только placeholder)
-openssl rand -hex 32   # для airflow-webserver-secret.webserver-secret-key
+openssl rand -hex 32
 ```
 
-```bash
-brew install kubeseal   # версия должна совпадать с контроллером: 0.39.1
+Вписать `REPLACE_WITH_*` в каждом файле (template-* не трогать — они в git, только placeholder). Значение `openssl rand -hex 32` — для `airflow-webserver-secret.webserver-secret-key`.
 
-for f in postgres redis minio gitea gitea-act-runner mlflow airflow minio-jury airflow-jury mlflow-jury; do
+`airflow-admin-secret` и `kaniko-registry-creds` шаблона в git не имеют (создаются напрямую):
+
+```bash
+kubectl create secret generic airflow-admin-secret -n mlops --dry-run=client -o yaml \
+  --from-literal=username=<admin-логин> --from-literal=password=<admin-пароль> > airflow-admin.yaml
+
+kubectl create secret docker-registry kaniko-registry-creds -n mlops --dry-run=client -o yaml \
+  --docker-server=<registry> --docker-username=<user> --docker-password=<pass> > kaniko-registry-creds.yaml
+```
+
+Версия kubeseal должна совпадать с контроллером: `0.31.0` (`bitnamilegacy/sealed-secrets-controller:0.31.0-debian-12-r0`).
+
+```bash
+brew install kubeseal
+kubeseal --version
+
+for f in postgres redis minio gitea gitea-db-passwd gitea-act-runner mlflow airflow minio-jury airflow-jury mlflow-jury airflow-admin kaniko-registry-creds; do
   kubeseal --format=yaml \
     --controller-name=sealed-secrets-controller \
     --controller-namespace=kube-system \
@@ -104,9 +114,9 @@ rm grafana-jury.yaml
 cd -
 ```
 
-Дописать `grafana.yaml` и `grafana-jury.yaml` в `resources` файла
-`manual/secrets/dev/sealed/kustomization.yaml` — до этого момента
-`kustomize build manual/secrets/dev/sealed` их не подхватит.
+`manual/secrets/dev/sealed/kustomization.yaml` уже содержит все ресурсы
+(включая `grafana.yaml`/`grafana-jury.yaml`), дописывать не нужно — только
+проверить, что новый `$f.yaml` из списка выше в нём тоже перечислен.
 `grafana-admin-secret`/`grafana-jury-secret` живут в `monitoring`, а не в
 `mlops` — namespace уже зашит в шаблонах, флаг `-n monitoring` для kubeseal
 дублирует его явно.
@@ -232,15 +242,25 @@ alerting-правила `kube-prometheus-stack` продолжают счита�
 
 | Секрет | Namespace | Ключи |
 |---|---|---|
-| `postgres-secret` | mlops | `postgres-password` |
+| `postgres-secret` | mlops | `postgres-user`, `postgres-password` |
 | `redis-secret` | mlops | `redis-password` |
-| `minio-secret` | mlops | `rootUser`, `rootPassword` |
+| `minio-secret` | mlops | `rootUser`, `rootPassword`, `root-user`, `root-password` |
 | `gitea-secret` | mlops | `username`, `password` |
+| `gitea-db-passwd` | mlops | `database` |
 | `gitea-act-runner-secret` | mlops | `token` |
 | `mlflow-basic-auth-secret` | mlops | `username`, `password` |
+| `mlflow-jury-secret` | mlops | `username`, `password` (роль read-only) |
 | `airflow-postgres-secret` | mlops | `connection` |
 | `airflow-redis-secret` | mlops | `connection` |
+| `airflow-minio-conn-secret` | mlops | `connection` |
 | `airflow-webserver-secret` | mlops | `webserver-secret-key` |
+| `airflow-fernet-key` | mlops | `fernet-key` |
+| `airflow-api-secret-key` | mlops | `api-secret-key` |
+| `airflow-jwt-secret` | mlops | `jwt-secret` |
+| `airflow-admin-secret` | mlops | `username`, `password` (шаблона в git нет, создаётся вручную) |
+| `airflow-jury-secret` | mlops | `username`, `password` (роль read-only) |
+| `minio-jury-secret` | mlops | `password` (роль read-only) |
+| `kaniko-registry-creds` | mlops | `.dockerconfigjson` (тип `docker-registry`, шаблона в git нет, создаётся вручную) — `imagePullSecrets` для gitea-act-runner/kaniko |
 | `grafana-admin-secret` | monitoring | `username`, `password` |
 | `grafana-jury-secret` | monitoring | `username`, `password` (роль `Viewer`, read-only, создаётся PostSync Job'ом) |
 | `argocd-secret` | argocd | `admin.password`, `admin.passwordMtime`, `accounts.readonly.password`, `accounts.readonly.passwordMtime` |
